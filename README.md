@@ -8,7 +8,7 @@ $ pip install lark-parser
 ```
 then to run the interpreter on a file just do
 ```
-$ python interpreter.py myprogram.lpp
+$ python src/lpp_interpreter.py myprogram.lpp
 ```
 
 ## Example program
@@ -29,7 +29,7 @@ endw
 
 You can run this example by
 ```
-$ python interpreter.py examples/factorial.lpp
+$ python src/lpp_interpreter.py examples/factorial.lpp
 ```
 
 ## Language definition
