@@ -12,7 +12,7 @@ class LppEvaluator():
         # the state is a function state : ide -> int
         # the empty state is represented by the 
         # constant function 0, since we dont have to declare variables
-        self.evalutate_program(tree, (lambda s : 0)) 
+        self.evalutate_program(tree, (lambda s : 0))
 
     # simple state-passing interpreter
     def evalutate_program(self, tree, state):

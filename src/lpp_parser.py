@@ -1,8 +1,11 @@
 from lark import Lark, Transformer, v_args
 
-def get_lpp_parser():
+def get_lpp_parser(triple=False):
     # grammar definition for our simple language
-    lpp_grammar = """
+    triple_grammar = """
+        ?triple: "{" boolexp "}" program "{" boolexp "}"
+    """
+    program_grammar = """
         ?program: statement
             | program ";" statement -> composition
 
@@ -37,4 +40,6 @@ def get_lpp_parser():
         %import common.WS
         %ignore WS
     """
-    return Lark(lpp_grammar, start='program', parser='lalr')
+
+    lpp_grammar = triple_grammar + program_grammar if triple else program_grammar
+    return Lark(lpp_grammar, start='triple' if triple else 'program', parser='lalr')
