@@ -5,27 +5,33 @@ class LppEvaluator():
         # grammar definition for our simple language
         lpp_grammar = """
             ?program: statement
-                | program ";" statement   -> composition
+                | program ";" statement -> composition
+
             ?statement: "if" boolexp "then" program "else" program "fi" -> if
-                    | "while" boolexp "do" program "endw"               -> while
-                    | "print" "(" [exp ("," exp)*] ")"                  -> print
-                    | IDE ":=" exp                                      -> assignment
-            ?boolexp : exp "<=" exp      -> le
-                    | exp ">=" exp       -> ge
-                    | exp "==" exp       -> eq
-                    | exp "!=" exp       -> neq
-                    | exp "<" exp        -> lt
-                    | exp ">" exp        -> gt
+                | "while" boolexp "do" program "endw"                   -> while
+                | "print" "(" [exp ("," exp)*] ")"                      -> print
+                | IDE ":=" exp                                          -> assignment
+
+            ?boolexp : exp "<=" exp     -> le
+                | exp ">=" exp          -> ge
+                | exp "==" exp          -> eq
+                | exp "!=" exp          -> neq
+                | exp "<" exp           -> lt
+                | exp ">" exp           -> gt
+
             ?exp: product
-                | exp "+" product   -> add
-                | exp "-" product   -> sub
+                | exp "+" product       -> add
+                | exp "-" product       -> sub
+
             ?product: atom
-                | product "*" atom  -> mul
-                | product "/" atom  -> div
-            ?atom: NUMBER           -> number
-                | "-" atom          -> neg
-                | IDE               -> var
+                | product "*" atom      -> mul
+                | product "/" atom      -> div
+
+            ?atom: NUMBER               -> number
+                | "-" atom              -> neg
+                | IDE                   -> var
                 | "(" exp ")"
+            
             %import common.CNAME -> IDE
             %import common.NUMBER
             %import common.WS
@@ -47,6 +53,7 @@ class LppEvaluator():
             s1, s2 = tree.children
             return self.evalutate_program(s2, 
                     self.evalutate_program(s1, state))
+
         elif tree.data == "if":
             guard, s1, s2 = tree.children
             # booleans are implemented c-style, so
@@ -55,6 +62,7 @@ class LppEvaluator():
                 return self.evalutate_program(s1, state)
             else:
                 return self.evalutate_program(s2, state)
+
         elif tree.data == "while":
             guard, c = tree.children
             # apply kind of boringly the semantics of the while statement
@@ -62,11 +70,13 @@ class LppEvaluator():
             while(self.evaluate_bool_expr(guard, new_state)):
                 new_state = self.evalutate_program(c, new_state)
             return new_state
+
         elif tree.data == "print":
             # just print the evaluated expression, what did you expect?
             for e in tree.children:
                 print(self.evaluate_expr(e, state))
             return state
+
         elif tree.data == "assignment":
             ide, exp = tree.children
             value = self.evaluate_expr(exp, state)
@@ -78,6 +88,7 @@ class LppEvaluator():
             return (lambda s: value if (s == ide) else state(s))
 
 
+    # simply evaluate a boolean expression
     def evaluate_bool_expr(self, tree, state) -> bool:
         if tree.data == "le":
             e1, e2 = tree.children
@@ -98,6 +109,7 @@ class LppEvaluator():
             e1, e2 = tree.children
             return self.evaluate_expr(e1, state) > self.evaluate_expr(e2, state)
 
+    # simply evaluate an integer expression
     def evaluate_expr(self, tree, state) -> int:
         if tree.data == "add":
             e1, e2 = tree.children
