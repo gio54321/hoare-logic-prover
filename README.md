@@ -6,7 +6,7 @@ To install the required dependencies use pip
 ```
 $ pip install lark-parser
 ```
-then run the interpreter on a file just do
+then to run the interpreter on a file just do
 ```
 $ python interpreter.py myprogram.lpp
 ```
