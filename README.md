@@ -6,9 +6,9 @@ To install the required dependencies use pip
 ```
 $ pip install lark-parser
 ```
-then run the interpreter by
+then run the interpreter on a file just do
 ```
-python interpreter.py
+$ python interpreter.py myprogram.lpp
 ```
 
 ## Example program
@@ -25,6 +25,11 @@ while j <= 20 do
     print(r);
     j := j+1
 endw
+```
+
+You can run this example by
+```
+$ python interpreter.py examples/factorial.lpp
 ```
 
 ## Language definition
