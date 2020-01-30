@@ -1,4 +1,5 @@
 from lark import Lark, Transformer, v_args
+import sys
 
 class LppEvaluator():
     def __init__(self):
@@ -129,45 +130,8 @@ class LppEvaluator():
         elif tree.data == "var":
             return state(tree.children[0])
 
-
-def test():
-    evaluator = LppEvaluator()
-
-    testnumber = 1
-    if testnumber == 0:
-        # calculate the factorial of the first 20 numbers
-        program = """
-            j := 1;
-            while j <= 20 do
-                i := 1;
-                r := 1;
-                while i <= j do
-                    r := r * i;
-                    i := i + 1
-                endw;
-                print(r);
-                j := j+1
-            endw
-        """
-    elif testnumber == 1:
-        # calculate fibonacci numbers
-        program = """
-            i := 1;
-            a := 1;
-            b := 1;
-            while i <= 20 do
-                c := a + b;
-                a := b;
-                b := c;
-                print(c);
-                i := i+1
-            endw
-        """
-        
-    evaluator.evaluate(program)
-    
-
-def main():
+def run_repl():
+    # run an interactive shell
     evaluator = LppEvaluator()
     while True:
         try:
@@ -176,6 +140,15 @@ def main():
             break
         evaluator.evaluate(s)
 
+def main():
+    # if a filename is provided via command line
+    # execute it, else run the repl
+    if(len(sys.argv) >= 2):
+        with open(sys.argv[1]) as f:
+            evaluator = LppEvaluator()
+            evaluator.evaluate(f.read())
+    else:
+        run_repl()
+
 if __name__ == '__main__':
-    test()
-    #main()
+    main()

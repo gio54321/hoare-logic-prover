@@ -1,0 +1,10 @@
+i := 1;
+a := 1;
+b := 1;
+while i <= 20 do
+    c := a + b;
+    a := b;
+    b := c;
+    print(c);
+    i := i+1
+endw

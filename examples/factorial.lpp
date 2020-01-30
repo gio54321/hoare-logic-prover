@@ -1,0 +1,11 @@
+j := 1;
+while j <= 20 do
+    i := 1;
+    r := 1;
+    while i <= j do
+        r := r * i;
+        i := i + 1
+    endw;
+    print(r);
+    j := j+1
+endw
