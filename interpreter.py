@@ -133,7 +133,7 @@ class LppEvaluator():
 def test():
     evaluator = LppEvaluator()
 
-    testnumber = 0
+    testnumber = 1
     if testnumber == 0:
         # calculate the factorial of the first 20 numbers
         program = """
@@ -149,6 +149,21 @@ def test():
                 j := j+1
             endw
         """
+    elif testnumber == 1:
+        # calculate fibonacci numbers
+        program = """
+            i := 1;
+            a := 1;
+            b := 1;
+            while i <= 20 do
+                c := a + b;
+                a := b;
+                b := c;
+                print(c);
+                i := i+1
+            endw
+        """
+        
     evaluator.evaluate(program)
     
 
@@ -162,5 +177,5 @@ def main():
         evaluator.evaluate(s)
 
 if __name__ == '__main__':
-    #test()
-    main()
+    test()
+    #main()
