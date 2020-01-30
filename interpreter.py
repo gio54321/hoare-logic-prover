@@ -11,6 +11,7 @@ class LppEvaluator():
             ?statement: "if" boolexp "then" program "else" program "fi" -> if
                 | "while" boolexp "do" program "endw"                   -> while
                 | "print" "(" [exp ("," exp)*] ")"                      -> print
+                | "skip"                                                -> skip
                 | IDE ":=" exp                                          -> assignment
 
             ?boolexp : exp "<=" exp     -> le
@@ -76,6 +77,10 @@ class LppEvaluator():
             # just print the evaluated expression, what did you expect?
             for e in tree.children:
                 print(self.evaluate_expr(e, state))
+            return state
+        
+        elif tree.data == "skip":
+            # do nothing, successfully
             return state
 
         elif tree.data == "assignment":

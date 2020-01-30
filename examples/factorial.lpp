@@ -1,7 +1,9 @@
 j := 1;
 while j <= 20 do
+    skip;
     i := 1;
     r := 1;
+    skip;
     while i <= j do
         r := r * i;
         i := i + 1
