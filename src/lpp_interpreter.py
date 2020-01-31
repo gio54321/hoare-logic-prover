@@ -80,6 +80,15 @@ class LppEvaluator():
         elif tree.data == "gt":
             e1, e2 = tree.children
             return self.evaluate_expr(e1, state) > self.evaluate_expr(e2, state)
+        elif tree.data == "and":
+            e1, e2 = tree.children
+            return self.evaluate_bool_expr(e1, state) and self.evaluate_bool_expr(e2, state)
+        elif tree.data == "or":
+            e1, e2 = tree.children
+            return self.evaluate_bool_expr(e1, state) or self.evaluate_bool_expr(e2, state)
+        elif tree.data == "not":
+            e1 = tree.children[0]
+            return not self.evaluate_bool_expr(e1, state)
 
     # simply evaluate an integer expression
     def evaluate_expr(self, tree, state) -> int:

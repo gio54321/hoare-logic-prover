@@ -15,12 +15,16 @@ def get_lpp_parser(triple=False):
             | "skip"                                                -> skip
             | IDE ":=" exp                                          -> assignment
 
-        ?boolexp : exp "<=" exp     -> le
-            | exp ">=" exp          -> ge
-            | exp "==" exp          -> eq
-            | exp "!=" exp          -> neq
-            | exp "<" exp           -> lt
-            | exp ">" exp           -> gt
+        ?boolexp : "(" boolexp ")"
+            | boolexp "and" boolexp    -> and
+            | boolexp "or" boolexp     -> or
+            | "not" boolexp            -> not
+            | exp "<=" exp             -> le
+            | exp ">=" exp             -> ge
+            | exp "==" exp             -> eq
+            | exp "!=" exp             -> neq
+            | exp "<" exp              -> lt
+            | exp ">" exp              -> gt
 
         ?exp: product
             | exp "+" product       -> add
