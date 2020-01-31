@@ -1,5 +1,6 @@
 import z3
 import sys
+from lark import Token
 
 import lpp_parser
 
@@ -13,8 +14,11 @@ class LppProver():
         return self.lpp_parser.parse(triple)
     
     def construnct_env(self, ides):
-        # convert ides to strings
-        ides = list(map((lambda x: x.value), ides.children))
+        if isinstance(ides, Token):
+            ides = [ides]
+        else:
+            # convert ides to strings
+            ides = list(map((lambda x: x.value), ides.children))
 
         # construct z3 symbols for all the ides
         env_str = ' '.join(ides)
@@ -69,6 +73,19 @@ class LppProver():
             return z3.IntVal(expr.children[0])
         elif expr.data == "var":
             return self.env[expr.children[0]]
+    
+    def find_axiom(self, command, postcond):
+        if command.data == "skip":
+            print("found axiom for skip command:", postcond)
+            return (True, postcond)
+        elif command.data == "assignment":
+            ide, exp = command.children
+            axiom = z3.substitute(postcond, (self.env[ide], self.expr_to_z3_formula(exp)))
+            print("found axiom for skip command:", axiom)
+            return (True, axiom)
+        else:
+            print("could not find axiom")
+            return (False, None)
 
     def prove_formula(self, what_to_prove):
         # return True is the formula provided is valid
@@ -79,16 +96,35 @@ class LppProver():
             print("proved", what_to_prove)
             return True
         else:
-            print("cound not prove", what_to_prove)
+            print("could not prove", what_to_prove)
             return False
     
     def prove_triple(self, precond, command, postcond):
         if command.data == "skip":
-            print("found skip command, trying to prove", z3.Implies(precond, postcond))
-            res = self.prove_formula(z3.Implies(precond, postcond))
+            formula_to_prove = z3.Implies(precond, postcond)
+            print("found skip command, trying to prove", formula_to_prove)
+            res = self.prove_formula(formula_to_prove)
             return res
+        elif command.data == "assignment":
+            ide, exp = command.children
+            formula_to_prove = z3.Implies(
+                precond,
+                z3.substitute(postcond, (self.env[ide], self.expr_to_z3_formula(exp)))
+            )
+            print("found assignment command, trying to prove", formula_to_prove)
+            res = self.prove_formula(formula_to_prove)
+            return res
+        elif command.data == "composition":
+            c1, c2 = command.children
+            print("found composition, trying to find axiom for the right side")
+            (res, axiom) = self.find_axiom(c2, postcond)
+            if res:
+                return self.prove_triple(precond, c1, axiom)
+            else:
+                return False
 
     def run(self, triple):
+        print("What to prove:", triple)
         tree = self.parse_triple(triple)
         self.construnct_env(tree.children[0])
         proof_res = self.prove_triple(
@@ -99,7 +135,7 @@ class LppProver():
         if proof_res:
             print("The triple is valid")
         else:
-            print("The triple is not valid")
+            print("Could not prove the validity of the triple")
         
 
 

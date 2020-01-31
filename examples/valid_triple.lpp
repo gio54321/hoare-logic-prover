@@ -1,4 +1,6 @@
-[x,y]
-{x>2}
-skip
-{x>0}
+[x, y, z]
+{x==0 and y==3}
+z := x;
+x := y;
+y := z
+{x==3 and y==0}
