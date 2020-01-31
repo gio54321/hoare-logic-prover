@@ -3,7 +3,8 @@ from lark import Lark, Transformer, v_args
 def get_lpp_parser(triple=False):
     # grammar definition for our simple language
     triple_grammar = """
-        ?triple: "{" boolexp "}" program "{" boolexp "}"
+        ?triple: varlist "{" boolexp "}" program "{" boolexp "}"
+        ?varlist: "[" [IDE ("," IDE)*] "]"
     """
     program_grammar = """
         ?program: statement
