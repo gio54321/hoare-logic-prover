@@ -69,20 +69,48 @@ class LppProver():
         elif expr.data == "div":
             e1, e2 = expr.children
             return self.expr_to_z3_formula(e1) / self.expr_to_z3_formula(e2)
+        elif expr.data == "neg":
+            e1 = expr.children[0]
+            return -self.expr_to_z3_formula(e1)
         elif expr.data == "number":
             return z3.IntVal(expr.children[0])
+        elif expr.data == "true":
+            return True
+        elif expr.data == "false":
+            return False
         elif expr.data == "var":
             return self.env[expr.children[0]]
     
     def find_axiom(self, command, postcond):
         if command.data == "skip":
-            print("found axiom for skip command:", postcond)
+            print("found axiom for skip statement:", postcond)
             return (True, postcond)
         elif command.data == "assignment":
             ide, exp = command.children
             axiom = z3.substitute(postcond, (self.env[ide], self.expr_to_z3_formula(exp)))
-            print("found axiom for skip command:", axiom)
+            print("found axiom for assignment statement:", axiom)
             return (True, axiom)
+        elif command.data == "if":
+            _, s1, s2 = command.children
+            print("trying to find an axiom for the first statement")
+            (res, ax) = self.find_axiom(s1, postcond)
+            if res:
+                print("now trying to prove the entire if statement")
+                res = self.prove_triple(ax, command, postcond)
+                if res:
+                    return (True, ax)
+                else:
+                    print("trying to find an axiom for the second statement")
+                    (res, ax) = self.find_axiom(s2, postcond)
+                    if res:
+                        print("now trying to prove the entire if statement")
+                        res = self.prove_triple(ax, command, postcond)
+                        if res:
+                            return (True, ax)
+                        else:
+                            print("could not find axiom for if statement")
+                            return (False, None)
+
         else:
             print("could not find axiom")
             return (False, None)
@@ -102,7 +130,7 @@ class LppProver():
     def prove_triple(self, precond, command, postcond):
         if command.data == "skip":
             formula_to_prove = z3.Implies(precond, postcond)
-            print("found skip command, trying to prove", formula_to_prove)
+            print("found skip statement, trying to prove", formula_to_prove)
             res = self.prove_formula(formula_to_prove)
             return res
         elif command.data == "assignment":
@@ -111,7 +139,7 @@ class LppProver():
                 precond,
                 z3.substitute(postcond, (self.env[ide], self.expr_to_z3_formula(exp)))
             )
-            print("found assignment command, trying to prove", formula_to_prove)
+            print("found assignment statement, trying to prove", formula_to_prove)
             res = self.prove_formula(formula_to_prove)
             return res
         elif command.data == "composition":
@@ -122,9 +150,21 @@ class LppProver():
                 return self.prove_triple(precond, c1, axiom)
             else:
                 return False
+        elif command.data == "if":
+            guard, s1, s2 = command.children
+            print("found if statement, trying to prove the first alternative")
+            res_1 = self.prove_triple(z3.And(precond, self.expr_to_z3_formula(guard)), s1, postcond)
+            if res_1:
+                print("now trying to prove the second alternative")
+                res_2 = self.prove_triple(z3.And(precond, z3.Not(self.expr_to_z3_formula(guard))), s2, postcond)
+                return res_2
+            else:
+                return False
+
+            
 
     def run(self, triple):
-        print("What to prove:", triple)
+        print("What to prove:", triple, "\n")
         tree = self.parse_triple(triple)
         self.construnct_env(tree.children[0])
         proof_res = self.prove_triple(
@@ -133,9 +173,9 @@ class LppProver():
             self.expr_to_z3_formula(tree.children[3])
         )
         if proof_res:
-            print("The triple is valid")
+            print("\nThe triple is valid")
         else:
-            print("Could not prove the validity of the triple")
+            print("\nCould not prove the validity of the triple")
         
 
 

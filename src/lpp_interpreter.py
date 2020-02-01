@@ -24,8 +24,7 @@ class LppEvaluator():
 
         elif tree.data == "if":
             guard, s1, s2 = tree.children
-            # booleans are implemented c-style, so
-            # any non-zero integer is truthy
+            # apply the semantics of the if statement
             if (self.evaluate_bool_expr(guard, state)):
                 return self.evalutate_program(s1, state)
             else:

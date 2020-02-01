@@ -1,6 +1,9 @@
-[x, y, z]
-{x==0 and y==3}
-z := x;
-x := y;
-y := z
-{x==3 and y==0}
+[x, y, z, A, B]
+{true}
+x := -1;
+if (x < 0) then
+    x := -x
+else
+    x := x
+fi
+{x>0}

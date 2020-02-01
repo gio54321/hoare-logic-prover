@@ -17,6 +17,8 @@ def get_lpp_parser(triple=False):
             | IDE ":=" exp                                          -> assignment
 
         ?boolexp : "(" boolexp ")"
+            | "true"                   -> true
+            | "false"                  -> false
             | boolexp "and" boolexp    -> and
             | boolexp "or" boolexp     -> or
             | "not" boolexp            -> not
