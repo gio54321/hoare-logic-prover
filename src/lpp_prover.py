@@ -28,8 +28,8 @@ class LppProver():
         for (i, ide) in enumerate(ides):
             self.env[ide] = ide_symols[i]
     
-    # basic structural induction on the formula
     def expr_to_z3_formula(self, expr):
+        # basic structural induction on the formula
         if expr.data == "le":
             e1, e2 = expr.children
             return self.expr_to_z3_formula(e1) <= self.expr_to_z3_formula(e2)
@@ -71,7 +71,7 @@ class LppProver():
             return self.expr_to_z3_formula(e1) / self.expr_to_z3_formula(e2)
         elif expr.data == "neg":
             e1 = expr.children[0]
-            return -self.expr_to_z3_formula(e1)
+            return 0-self.expr_to_z3_formula(e1)
         elif expr.data == "number":
             return z3.IntVal(expr.children[0])
         elif expr.data == "true":
@@ -82,15 +82,26 @@ class LppProver():
             return self.env[expr.children[0]]
     
     def find_axiom(self, command, postcond):
+        # try to find an axiom of a triple, given the
+        # command and the postcondition
         if command.data == "skip":
+            # in case of skip the axiom is simply {p}skip{p}
             print("found axiom for skip statement:", postcond)
             return (True, postcond)
         elif command.data == "assignment":
+            # in case of an assignment, the axiom
+            # is {p[E/x]}x:=E{p}
             ide, exp = command.children
             axiom = z3.substitute(postcond, (self.env[ide], self.expr_to_z3_formula(exp)))
             print("found axiom for assignment statement:", axiom)
             return (True, axiom)
         elif command.data == "if":
+            # in case of an if statement there is no given axiom, however
+            # we can do some kind of heuristics to find a candidate.
+            # it basically search for an axiom on the first statement
+            # and then tries to prove thr entire if triple with that 
+            # precondition. If it fails it tries to find an axiom on
+            # the second statement and tries to prove the entire triple
             _, s1, s2 = command.children
             print("trying to find an axiom for the first statement")
             (res, ax) = self.find_axiom(s1, postcond)
@@ -117,6 +128,10 @@ class LppProver():
 
     def prove_formula(self, what_to_prove):
         # return True is the formula provided is valid
+        # for this we use a well-known fact in logic
+        # that is a formula f is valid iff (not)f is unsatisfiable
+        # so we negate the formula and if it is unstatisfiable,
+        # then it is valid
         s = z3.Solver()
         s.add(z3.Not(what_to_prove))
         res = s.check()
@@ -129,11 +144,17 @@ class LppProver():
     
     def prove_triple(self, precond, command, postcond):
         if command.data == "skip":
+            # the inference rule for the skip command is really simple
+            # given a triple in the form of {p}skip{q} is sufficient to
+            # prove that p=>q
             formula_to_prove = z3.Implies(precond, postcond)
             print("found skip statement, trying to prove", formula_to_prove)
             res = self.prove_formula(formula_to_prove)
             return res
         elif command.data == "assignment":
+            # the inference rule for the assignment command is again simple
+            # given a triple in the form of {p}x:=E{q} is sufficient to
+            # prove that p=>q[E/x]
             ide, exp = command.children
             formula_to_prove = z3.Implies(
                 precond,
@@ -142,15 +163,10 @@ class LppProver():
             print("found assignment statement, trying to prove", formula_to_prove)
             res = self.prove_formula(formula_to_prove)
             return res
-        elif command.data == "composition":
-            c1, c2 = command.children
-            print("found composition, trying to find axiom for the right side")
-            (res, axiom) = self.find_axiom(c2, postcond)
-            if res:
-                return self.prove_triple(precond, c1, axiom)
-            else:
-                return False
         elif command.data == "if":
+            # the inference rule for the if command is pretty straight forward
+            # to implement: given a triple in the form of {p}if E then c else s fi{q}
+            # it is sufficient to prove the two triples {p and E}c{q} and {p and not E}s{q}
             guard, s1, s2 = command.children
             print("found if statement, trying to prove the first alternative")
             res_1 = self.prove_triple(z3.And(precond, self.expr_to_z3_formula(guard)), s1, postcond)
@@ -160,8 +176,22 @@ class LppProver():
                 return res_2
             else:
                 return False
-
-            
+        elif command.data == "composition":
+            # the inference rule for the composition requires a
+            # special treatment. Given a triple in the form of 
+            # {p}c;s{q} is sufficient to find some predicate r
+            # so that {p}c{r} and {r}s{q} are both valid triples.
+            # To do that we try to find an axiom for the second triple,
+            # so that we have a candidate for r, then we try to prove 
+            # {p}c{r}. If this triple is valid then the whole composition
+            # triple is valid
+            c1, c2 = command.children
+            print("found composition, trying to find axiom for the right side")
+            (res, axiom) = self.find_axiom(c2, postcond)
+            if res:
+                return self.prove_triple(precond, c1, axiom)
+            else:
+                return False
 
     def run(self, triple):
         print("What to prove:", triple, "\n")
