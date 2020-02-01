@@ -1,4 +1,4 @@
-# Hoare prover
+# Hoare logic prover
 A very basic prover for Hoare triples.
 
 ## Introduction: what is Hoare logic?
