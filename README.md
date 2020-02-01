@@ -1,65 +1,67 @@
-# lpp-interpreter
-A simple interpreter for a simple language.
+# Hoare prover
+A very basic prover for Hoare triples.
+
+## Introduction: what is Hoare logic?
+According to [Wikipedia](https://en.wikipedia.org/wiki/Hoare_logic), Hoare logic is a formal system with a set of logical rules for reasoning rigorously about the correctness of computer programs. It was proposed in 1969 by the British computer scientist and logician _Tony Hoare_, and subsequently refined by Hoare and other researchers. The original ideas were seeded by the work of Robert W. Floyd, who had published a similar system for flowcharts.
+
+## What this software is
+A very simple automatic prover for Hoare triplets that takes in input a triplet and tries to formally prove it using the inference rules. Because of its simplicity it is not very capable right now, and it can only prove very basic triples.
 
 ## Install and run
 To install the required dependencies use pip
 ```
-$ pip install lark-parser
+$ pip install lark-parser z3-solver
 ```
-then to run the interpreter on a file just do
+then to run the prover on a file just do
 ```
-$ python src/lpp_interpreter.py myprogram.lpp
-```
-
-## Example program
-Here is an example for a program that prints the factorial of the first 20 natural numbers
-```
-j := 1;
-while j <= 20 do
-    i := 1;
-    r := 1;
-    while i <= j do
-        r := r * i;
-        i := i + 1
-    endw;
-    print(r);
-    j := j+1
-endw
+$ python src/lpp_prover.py mytriple.lpp
 ```
 
+## Example triple
+Here is an example triple that can give you the feeling of this system
+```
+[x, A]
+{x==A}
+x := x-3;
+if (x >= 0) then
+    x := x + 5
+else
+    x := -x + 5
+fi
+{x>A}
+```
 You can run this example by
 ```
-$ python src/lpp_interpreter.py examples/factorial.lpp
+$ python src/lpp_prover.py examples/if_triple.lpp
 ```
-
-## Language definition
-The grammar for the language can be found in the source code and it is really minimal
+The output shoud look like this:
 ```
-program: statement
-    | program ";" statement
+What to prove: [x, A]
+{x==A}
+x := x-3;
+if (x >= 0) then
+    x := x + 5
+else
+    x := -x + 5
+fi
+{x>A} 
 
-statement: "if" boolexp "then" program "else" program "fi"
-    | "while" boolexp "do" program "endw"
-    | "print" "(" [exp ("," exp)*] ")"
-    | IDE ":=" exp
+found composition, trying to find axiom for the right side
+trying to find an axiom for the first statement
+found axiom for assignment statement: x + 5 > A
+now trying to prove the entire if statement
+found if statement, trying to prove the first alternative
+found assignment statement, trying to prove Implies(And(x + 5 > A, 0 <= x), x + 5 > A)
+proved Implies(And(x + 5 > A, 0 <= x), x + 5 > A)
+now trying to prove the second alternative
+found assignment statement, trying to prove Implies(And(x + 5 > A, Not(0 <= x)), 0 - x + 5 > A)
+proved Implies(And(x + 5 > A, Not(0 <= x)), 0 - x + 5 > A)
+found assignment statement, trying to prove Implies(x == A, x - 3 + 5 > A)
+proved Implies(x == A, x - 3 + 5 > A)
 
-boolexp : exp "<=" exp
-    | exp ">=" exp
-    | exp "==" exp
-    | exp "!=" exp
-    | exp "<" exp
-    | exp ">" exp
-
-exp: product
-    | exp "+" product
-    | exp "-" product
-
-product: atom
-    | product "*" atom
-    | product "/" atom
-
-atom: NUMBER
-    | "-" atom
-    | IDE
-    | "(" exp ")"
+The triple is valid
 ```
+The verdict is that this simple triple is indeed valid (I mean, yeah obviously).
+
+## How dows it work?
+This software heavily uses [z3](https://github.com/Z3Prover/z3) theorem prover to prove the implications. It basically do an induction on the structure of the program to find the appropriate inference rule, and tries to prove the required formulas. It also uses some heuristic guessing to find composition intermediate condition and if statement axioms, but basically it is direct application of inference rules.
