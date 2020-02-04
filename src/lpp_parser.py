@@ -11,7 +11,7 @@ def get_lpp_parser(triple=False):
             | program ";" statement -> composition
 
         ?statement: "if" boolexp "then" program "else" program "fi" -> if
-            | "while" boolexp "do" program "endw"                   -> while
+            | "while" boolexp "where t is" exp ";" "inv is" boolexp "do" program "endw"   -> while
             | "print" "(" [exp ("," exp)*] ")"                      -> print
             | "skip"                                                -> skip
             | IDE ":=" exp                                          -> assignment

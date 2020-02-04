@@ -130,8 +130,6 @@ class LppProver():
                 if res:
                     return (True, ax)
             return (False, None)
-
-
         else:
             print("could not find axiom")
             return (False, None)
@@ -202,6 +200,47 @@ class LppProver():
                 return self.prove_triple(precond, c1, axiom)
             else:
                 return False
+        elif command.data == "while":
+            # the inference rule for the while command is kind of complicated
+            # so we have to be careful: given a triple in the form
+            # of {p}while E do C endw{q} we need a loop invariant (inv) and a counter (t)
+            # we have to prove the following statements
+            # 1) p => inv (pre)
+            # 2) (inv and not E) => q (post)
+            # 3) inv => t>=0 (termination)
+            # 4) {inv and E}C{inv} (invariance)
+            # 5) {inv and E and t==V}C{t<V} (progress)
+            e, t_expr, inv, c = command.children
+            print("found while statement, trying to prove:")
+            invariant = self.expr_to_z3_formula(inv)
+            t = self.expr_to_z3_formula(t_expr)
+            guard = self.expr_to_z3_formula(e)
+            pre = z3.Implies(precond, invariant)
+            post = z3.Implies(z3.And(precond, z3.Not(guard)), postcond)
+            term = z3.Implies(z3.And(invariant, self.env["t"] == t), t>=0)
+            print("1) [pre]", pre)
+            res = self.prove_formula(pre)
+            if res:
+                print("2) [post]", post)
+                res = self.prove_formula(post)
+                if res:
+                    print("3) [term]", term)
+                    res = self.prove_formula(term)
+                    if res:
+                        print("4) [invariance]", term)
+                        res = self.prove_triple(z3.And(invariant, guard), c, invariant)
+                        if res:
+                            print("5) [progress]", term)
+                            v = z3.Int("V")
+                            res=self.prove_triple(
+                                z3.And(z3.And(invariant, guard), t==v),
+                                c,
+                                t<v
+                            )
+                            return res
+            return False
+
+
 
     def run(self, triple):
         print("What to prove:", triple, "\n")

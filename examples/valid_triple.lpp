@@ -1,14 +1,6 @@
-[x, A]
-{x==A}
-if (x >= 0) then
-    if (x > 3) then
-        x := x - 1
-    else
-        x := x - 2
-    fi;
-    x := x + 100
-else
-    x := -x + 5
-fi;
-x := x - 3
-{x>A}
+[i, s, t]
+{i==5}
+while (i>0) where t is i; inv is i>=0 do
+    i := i-1
+endw
+{s>t}
