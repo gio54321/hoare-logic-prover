@@ -1,8 +1,10 @@
-import z3
 import sys
+
+import z3
 from lark import Token
 
 import lpp_parser
+
 
 class LppProver():
     def __init__(self):

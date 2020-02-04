@@ -1,7 +1,9 @@
-from lark import Lark, Transformer, v_args
 import sys
 
+from lark import Lark, Transformer, v_args
+
 import lpp_parser
+
 
 class LppEvaluator():
     def __init__(self):
