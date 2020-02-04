@@ -1,10 +1,10 @@
 # Hoare logic prover
 A very basic prover for Hoare triples.
 
-## Introduction: what is Hoare logic?
+## What is Hoare logic?
 According to [Wikipedia](https://en.wikipedia.org/wiki/Hoare_logic), Hoare logic is a formal system with a set of logical rules for reasoning rigorously about the correctness of computer programs. It was proposed in 1969 by the British computer scientist and logician _Tony Hoare_, and subsequently refined by Hoare and other researchers. The original ideas were seeded by the work of Robert W. Floyd, who had published a similar system for flowcharts.
 
-## What this software is
+## What this program is
 A very simple automatic prover for Hoare triplets that takes in input a triplet and tries to formally prove it using the inference rules. Because of its simplicity it is not very capable right now, and it can only prove very basic triples.
 
 ## Install and run
@@ -61,7 +61,7 @@ proved Implies(x == A, x - 3 + 5 > A)
 
 The triple is valid
 ```
-The verdict is that this simple triple is indeed valid (I mean, yeah obviously).
+The verdict is that this simple triple is indeed valid (I mean, yeah obviously). One interesting thing to notice is that the proof is completely parametric as in this case `x` is parametrized with the symbol `A`.
 
 ## How dows it work?
 This software heavily uses [z3](https://github.com/Z3Prover/z3) theorem prover to prove the implications. It basically do an induction on the structure of the program to find the appropriate inference rule, and tries to prove the required formulas. It also uses some heuristic guessing to find composition intermediate condition and if statement axioms, but basically it is direct application of inference rules.

@@ -1,9 +1,14 @@
 [x, A]
 {x==A}
-x := x-3;
 if (x >= 0) then
-    x := x + 5
+    if (x > 3) then
+        x := x - 1
+    else
+        x := x - 2
+    fi;
+    x := x + 100
 else
     x := -x + 5
-fi
+fi;
+x := x - 3
 {x>A}

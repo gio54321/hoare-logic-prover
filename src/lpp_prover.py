@@ -121,6 +121,16 @@ class LppProver():
                         else:
                             print("could not find axiom for if statement")
                             return (False, None)
+        elif command.data == "composition":
+            c1, c2 = command.children
+            print("trying to find an axiom for a composition statement")
+            (res, ax) = self.find_axiom(c2, postcond)
+            if res:
+                (res, ax) = self.find_axiom(c1, ax)
+                if res:
+                    return (True, ax)
+            return (False, None)
+
 
         else:
             print("could not find axiom")
