@@ -1,7 +1,7 @@
 [i, s, t, r]
 {i==0 and r==0}
-while (i<5) where t is (5-i); inv is r==5*i and 5-i>=0 do
+while (i<10) where t is (10-i); inv is (r==5*i and 10-i>=0) do
     i := i+1;
     r := r+5
 endw
-{r==5*i}
+{r==5*10}

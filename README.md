@@ -1,6 +1,8 @@
 # Hoare logic prover
 A very basic prover for Hoare triples.
 
+If you want to learn more about how this thing works, [I wrote a blog post about it](https://gio54321.github.io/posts/hoare-prover)
+
 ## What is Hoare logic?
 According to [Wikipedia](https://en.wikipedia.org/wiki/Hoare_logic), Hoare logic is a formal system with a set of logical rules for reasoning rigorously about the correctness of computer programs. It was proposed in 1969 by the British computer scientist and logician _Tony Hoare_, and subsequently refined by Hoare and other researchers. The original ideas were seeded by the work of Robert W. Floyd, who had published a similar system for flowcharts.
 

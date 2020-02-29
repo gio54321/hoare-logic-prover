@@ -1,0 +1,6 @@
+[x, y, z, A, B]
+{x==A and y==B}
+z := x;
+x := y;
+y := z
+{x==B and y==A}
